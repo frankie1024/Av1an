@@ -63,6 +63,14 @@ struct EncodeProgress {
 }
 
 #[derive(Serialize)]
+struct EncoderLog<'a> {
+    chunk_index: usize,
+    encoder: &'a str,
+    frames: usize,
+    stderr: &'a str,
+}
+
+#[derive(Serialize)]
 struct RunFinished {
     exit_code: i32,
 }
@@ -206,6 +214,23 @@ pub fn emit_chunk_progress(
             fraction_done: completed_chunks as u32,
             fraction_total: total_chunks as u32,
             chunk_index: chunk.map(|value| value.index),
+        },
+    );
+}
+
+pub fn emit_encoder_log(progress_format: ProgressFormat, chunk: &Chunk, stderr: &str) {
+    if stderr.trim().is_empty() {
+        return;
+    }
+
+    emit(
+        progress_format,
+        "encoder_log",
+        EncoderLog {
+            chunk_index: chunk.index,
+            encoder: encoder_name(chunk.encoder),
+            frames: chunk.frames(),
+            stderr,
         },
     );
 }

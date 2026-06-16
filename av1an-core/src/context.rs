@@ -865,6 +865,8 @@ impl Av1anContext {
                     frame,
                 ));
             }
+
+            flowencode_protocol::emit_encoder_log(self.args.progress_format, chunk, &enc_stderr);
         }
 
         Ok(())
