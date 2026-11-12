@@ -28,7 +28,11 @@ pub use crate::{
     concat::ConcatMethod,
     context::Av1anContext,
     encoder::Encoder,
-    flowencode_protocol::{capabilities as flowencode_capabilities, ProgressFormat, FLOWENCODE_PROTOCOL_VERSION},
+    flowencode_protocol::{
+        capabilities as flowencode_capabilities,
+        ProgressFormat,
+        FLOWENCODE_PROTOCOL_VERSION,
+    },
     settings::{EncodeArgs, InputPixelFormat, PixelFormat, PixelFormatConverter},
     target_quality::{InterpolationMethod, TargetQuality},
     util::read_in_dir,

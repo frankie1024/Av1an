@@ -9,9 +9,9 @@ use std::{
 
 use anyhow::{anyhow, bail, ensure, Context};
 use av1an_core::{
-    flowencode_protocol,
     ffmpeg::FFPixelFormat,
     flowencode_capabilities,
+    flowencode_protocol,
     hash_path,
     into_vec,
     read_in_dir,
@@ -88,7 +88,7 @@ fn version() -> &'static str {
                 Some(commit_date),
             ) => {
                 format!(
-                    "{}-unstable (rev {}) ({}) | rustc {} (LLVM {}) | {} | {}",
+                    "{} (rev {}) ({}) | rustc {} (LLVM {}) | {} | {}",
                     env!("CARGO_PKG_VERSION"),
                     git_hash,
                     if cargo_debug.parse::<bool>().unwrap() {
@@ -965,9 +965,10 @@ pub fn parse_cli(args: &CliOpts) -> anyhow::Result<Vec<EncodeArgs>> {
             |path| path.to_string_lossy().to_string(),
         );
 
-
         let chunk_method = args.chunk_method.unwrap_or_else(|| {
-            vapoursynth_plugins.map_or(ChunkMethod::Hybrid, |plugins| plugins.best_available_chunk_method())
+            vapoursynth_plugins.map_or(ChunkMethod::Hybrid, |plugins| {
+                plugins.best_available_chunk_method()
+            })
         });
         let scaler = {
             let mut scaler = args.scaler.clone();
@@ -995,8 +996,8 @@ pub fn parse_cli(args: &CliOpts) -> anyhow::Result<Vec<EncodeArgs>> {
             args.cache_mode,
         )?;
 
-        // Assumes proxies supplied are the same number as inputs. Otherwise gets the
-        // first proxy if available
+        // Assumes proxies supplied are the same number as inputs. Otherwise
+        // gets the first proxy if available
         let proxy_path = proxies.get(index).or_else(|| proxies.first());
         let proxy = if let Some(path) = proxy_path {
             Some(Input::new(
@@ -1161,7 +1162,8 @@ pub fn parse_cli(args: &CliOpts) -> anyhow::Result<Vec<EncodeArgs>> {
 #[instrument]
 pub fn run() -> anyhow::Result<()> {
     let cli_options = CliOpts::parse();
-    let progress_format = parse_progress_format(&cli_options.progress_format).unwrap_or(ProgressFormat::Human);
+    let progress_format =
+        parse_progress_format(&cli_options.progress_format).unwrap_or(ProgressFormat::Human);
 
     if cli_options.protocol_version {
         println!("{}", av1an_core::FLOWENCODE_PROTOCOL_VERSION);
@@ -1207,7 +1209,7 @@ pub fn run() -> anyhow::Result<()> {
         Err(error) => {
             flowencode_protocol::emit_run_failed(progress_format, 1, &error.to_string());
             return Err(error);
-        }
+        },
     };
 
     for arg in args {

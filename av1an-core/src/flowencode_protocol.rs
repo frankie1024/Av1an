@@ -15,39 +15,39 @@ pub enum ProgressFormat {
 
 #[derive(Serialize)]
 pub struct Capabilities<'a> {
-    pub protocol: i32,
-    pub backend_version: &'a str,
-    pub supported_metrics: &'a [&'a str],
+    pub protocol:           i32,
+    pub backend_version:    &'a str,
+    pub supported_metrics:  &'a [&'a str],
     pub supported_encoders: &'a [&'a str],
-    pub interp_methods: &'a [&'a str],
-    pub probing_stats: &'a [&'a str],
+    pub interp_methods:     &'a [&'a str],
+    pub probing_stats:      &'a [&'a str],
 }
 
 #[derive(Serialize)]
 struct Event<'a, T: Serialize> {
     #[serde(rename = "type")]
     event_type: &'a str,
-    ts: String,
+    ts:         String,
     #[serde(flatten)]
-    payload: T,
+    payload:    T,
 }
 
 #[derive(Serialize)]
 struct RunStarted<'a> {
-    protocol: i32,
+    protocol:        i32,
     backend_version: &'a str,
-    encoder: &'a str,
-    target_metric: &'a str,
-    target_quality: Option<(f64, f64)>,
+    encoder:         &'a str,
+    target_metric:   &'a str,
+    target_quality:  Option<(f64, f64)>,
 }
 
 #[derive(Serialize)]
 struct InputProbed<'a> {
-    input_kind: &'a str,
-    width: u32,
-    height: u32,
+    input_kind:   &'a str,
+    width:        u32,
+    height:       u32,
     total_frames: usize,
-    fps: String,
+    fps:          String,
 }
 
 #[derive(Serialize)]
@@ -57,17 +57,17 @@ struct ChunkPlan {
 
 #[derive(Serialize)]
 struct EncodeProgress {
-    fraction_done: u32,
+    fraction_done:  u32,
     fraction_total: u32,
-    chunk_index: Option<usize>,
+    chunk_index:    Option<usize>,
 }
 
 #[derive(Serialize)]
 struct EncoderLog<'a> {
     chunk_index: usize,
-    encoder: &'a str,
-    frames: usize,
-    stderr: &'a str,
+    encoder:     &'a str,
+    frames:      usize,
+    stderr:      &'a str,
 }
 
 #[derive(Serialize)]
@@ -78,14 +78,14 @@ struct RunFinished {
 #[derive(Serialize)]
 struct RunFailed<'a> {
     exit_code: i32,
-    message: &'a str,
+    message:   &'a str,
 }
 
 pub fn capabilities() -> Capabilities<'static> {
     Capabilities {
-        protocol: FLOWENCODE_PROTOCOL_VERSION,
-        backend_version: env!("CARGO_PKG_VERSION"),
-        supported_metrics: &[
+        protocol:           FLOWENCODE_PROTOCOL_VERSION,
+        backend_version:    env!("CARGO_PKG_VERSION"),
+        supported_metrics:  &[
             "vmaf",
             "ssimulacra2",
             "butteraugli-inf",
@@ -94,7 +94,7 @@ pub fn capabilities() -> Capabilities<'static> {
             "xpsnr-weighted",
         ],
         supported_encoders: &["x264", "x265", "svt-av1"],
-        interp_methods: &[
+        interp_methods:     &[
             "linear",
             "quadratic",
             "natural",
@@ -104,7 +104,7 @@ pub fn capabilities() -> Capabilities<'static> {
             "akima",
             "cubic-polynomial",
         ],
-        probing_stats: &[
+        probing_stats:      &[
             "auto",
             "mean",
             "median",
@@ -161,45 +161,33 @@ fn metric_name(metric: TargetMetric) -> &'static str {
 }
 
 pub fn emit_run_started(args: &EncodeArgs) {
-    emit(
-        args.progress_format,
-        "run_started",
-        RunStarted {
-            protocol: FLOWENCODE_PROTOCOL_VERSION,
-            backend_version: env!("CARGO_PKG_VERSION"),
-            encoder: encoder_name(args.encoder),
-            target_metric: metric_name(args.target_quality.metric),
-            target_quality: args.target_quality.target,
-        },
-    );
+    emit(args.progress_format, "run_started", RunStarted {
+        protocol:        FLOWENCODE_PROTOCOL_VERSION,
+        backend_version: env!("CARGO_PKG_VERSION"),
+        encoder:         encoder_name(args.encoder),
+        target_metric:   metric_name(args.target_quality.metric),
+        target_quality:  args.target_quality.target,
+    });
 }
 
 pub fn emit_input_probed(args: &EncodeArgs, clip_info: &ClipInfo) {
-    emit(
-        args.progress_format,
-        "input_probed",
-        InputProbed {
-            input_kind: if args.input.is_vapoursynth() {
-                "vapoursynth"
-            } else {
-                "video"
-            },
-            width: clip_info.resolution.0,
-            height: clip_info.resolution.1,
-            total_frames: clip_info.num_frames,
-            fps: format!("{:.3}", clip_info.frame_rate.to_f64().unwrap_or_default()),
+    emit(args.progress_format, "input_probed", InputProbed {
+        input_kind:   if args.input.is_vapoursynth() {
+            "vapoursynth"
+        } else {
+            "video"
         },
-    );
+        width:        clip_info.resolution.0,
+        height:       clip_info.resolution.1,
+        total_frames: clip_info.num_frames,
+        fps:          format!("{:.3}", clip_info.frame_rate.to_f64().unwrap_or_default()),
+    });
 }
 
 pub fn emit_chunk_plan(progress_format: ProgressFormat, chunk_count: usize) {
-    emit(
-        progress_format,
-        "chunk_plan",
-        ChunkPlan {
-            chunk_count: chunk_count as u32,
-        },
-    );
+    emit(progress_format, "chunk_plan", ChunkPlan {
+        chunk_count: chunk_count as u32,
+    });
 }
 
 pub fn emit_chunk_progress(
@@ -208,15 +196,11 @@ pub fn emit_chunk_progress(
     total_chunks: usize,
     chunk: Option<&Chunk>,
 ) {
-    emit(
-        progress_format,
-        "encode_progress",
-        EncodeProgress {
-            fraction_done: completed_chunks as u32,
-            fraction_total: total_chunks as u32,
-            chunk_index: chunk.map(|value| value.index),
-        },
-    );
+    emit(progress_format, "encode_progress", EncodeProgress {
+        fraction_done:  completed_chunks as u32,
+        fraction_total: total_chunks as u32,
+        chunk_index:    chunk.map(|value| value.index),
+    });
 }
 
 pub fn emit_encoder_log(progress_format: ProgressFormat, chunk: &Chunk, stderr: &str) {
@@ -224,29 +208,37 @@ pub fn emit_encoder_log(progress_format: ProgressFormat, chunk: &Chunk, stderr: 
         return;
     }
 
-    emit(
-        progress_format,
-        "encoder_log",
-        EncoderLog {
-            chunk_index: chunk.index,
-            encoder: encoder_name(chunk.encoder),
-            frames: chunk.frames(),
-            stderr,
-        },
-    );
+    emit(progress_format, "encoder_log", EncoderLog {
+        chunk_index: chunk.index,
+        encoder: encoder_name(chunk.encoder),
+        frames: chunk.frames(),
+        stderr,
+    });
 }
 
 pub fn emit_run_completed(progress_format: ProgressFormat) {
-    emit(progress_format, "run_completed", RunFinished { exit_code: 0 });
+    emit(progress_format, "run_completed", RunFinished {
+        exit_code: 0,
+    });
 }
 
 pub fn emit_run_failed(progress_format: ProgressFormat, exit_code: i32, message: &str) {
-    emit(
-        progress_format,
-        "run_failed",
-        RunFailed {
-            exit_code,
-            message,
-        },
-    );
+    emit(progress_format, "run_failed", RunFailed {
+        exit_code,
+        message,
+    });
+}
+
+#[cfg(test)]
+mod tests {
+    use std::str::FromStr;
+
+    use crate::InterpolationMethod;
+
+    #[test]
+    fn advertised_interpolation_methods_are_accepted_by_cli() {
+        for method in super::capabilities().interp_methods {
+            assert!(InterpolationMethod::from_str(method).is_ok(), "{method}");
+        }
+    }
 }

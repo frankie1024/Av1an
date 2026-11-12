@@ -67,7 +67,7 @@ impl FromStr for InterpolationMethod {
             "pchip" => Ok(Self::Pchip),
             "catmull" => Ok(Self::Catmull),
             "akima" => Ok(Self::Akima),
-            "cubicpolynomial" | "cubic" => Ok(Self::CubicPolynomial),
+            "cubicpolynomial" | "cubic-polynomial" | "cubic" => Ok(Self::CubicPolynomial),
             _ => Err(()),
         }
     }
