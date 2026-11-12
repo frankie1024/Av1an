@@ -16,7 +16,9 @@ jobs:
       - uses: ilammy/setup-nasm@v1
       - uses: Swatinem/rust-cache@v2
       - name: Format workspace
-        run: cargo fmt --all
+        run: |
+          cargo fmt --all
+          git diff --binary --output=format.patch
       - name: Build Windows backend
         run: cargo build --release --locked
       - name: Test interpolation
@@ -29,7 +31,7 @@ jobs:
           $protocol = & target/release/av1an.exe --protocol-version
           if ($LASTEXITCODE -ne 0 -or $protocol.Trim() -ne '1') { throw 'Invalid protocol version' }
           $caps = & target/release/av1an.exe --capabilities | ConvertFrom-Json
-          if ($LASTEXITCODE -ne 0 -or $caps.protocol -ne 1 -or $caps.backend_version -ne '0.6.0') { throw 'Invalid backend capabilities' }
+          if ($LASTEXITCODE -ne 0 -or $caps.protocol -ne 1 -or $caps.backend_version -ne '0.6.0-flowencode.1') { throw 'Invalid backend capabilities' }
           if ('fritschcarlson' -notin $caps.interp_methods) { throw 'Missing upstream interpolation method' }
       - uses: actions/upload-artifact@v4
         with:
@@ -37,4 +39,5 @@ jobs:
           path: |
             target/release/av1an.exe
             Cargo.lock
+            format.patch
           if-no-files-found: error
