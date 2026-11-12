@@ -51,13 +51,12 @@ fn main() -> anyhow::Result<()> {
     // Catch panics in child threads
     panic::set_hook(Box::new(move |panic_info| {
         if detect_progress_format_from_argv() == ProgressFormat::Jsonl {
-            let panic_message = if let Some(message) = panic_info.payload().downcast_ref::<&str>() {
-                *message
-            } else if let Some(message) = panic_info.payload().downcast_ref::<String>() {
-                message.as_str()
-            } else {
-                "panic"
-            };
+            let panic_message = panic_info
+                .payload()
+                .downcast_ref::<&str>()
+                .copied()
+                .or_else(|| panic_info.payload().downcast_ref::<String>().map(String::as_str))
+                .unwrap_or("panic");
             flowencode_protocol::emit_run_failed(ProgressFormat::Jsonl, 1, panic_message);
         }
         orig_hook(panic_info);
