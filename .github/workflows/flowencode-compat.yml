@@ -1,0 +1,40 @@
+name: FlowEncode compatibility
+
+on:
+  push:
+    branches: [master, 'codex/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ilammy/setup-nasm@v1
+      - uses: Swatinem/rust-cache@v2
+      - name: Format workspace
+        run: cargo fmt --all
+      - name: Build Windows backend
+        run: cargo build --release --locked
+      - name: Test interpolation
+        run: cargo test --release --locked -p av1an-core --lib interpol::
+      - name: Test color range mapping
+        run: cargo test --release --locked -p av1an-core --lib vapoursynth::tests::
+      - name: Verify FlowEncode protocol
+        shell: pwsh
+        run: |
+          $protocol = & target/release/av1an.exe --protocol-version
+          if ($LASTEXITCODE -ne 0 -or $protocol.Trim() -ne '1') { throw 'Invalid protocol version' }
+          $caps = & target/release/av1an.exe --capabilities | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or $caps.protocol -ne 1 -or $caps.backend_version -ne '0.6.0') { throw 'Invalid backend capabilities' }
+          if ('fritschcarlson' -notin $caps.interp_methods) { throw 'Missing upstream interpolation method' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: av1an-flowencode-windows
+          path: |
+            target/release/av1an.exe
+            Cargo.lock
+          if-no-files-found: error
