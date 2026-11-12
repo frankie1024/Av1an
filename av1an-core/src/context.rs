@@ -180,7 +180,8 @@ impl Av1anContext {
         let initial_frames =
             get_done().done.iter().map(|ref_multi| ref_multi.frames).sum::<usize>();
 
-        // Create the VapourSynth script file and store the path to it and evaluate it
+        // Create the VapourSynth script file and store the path to it and
+        // evaluate it
         let cache_vs_input = |vs_input: &Input| {
             let script_path = match vs_input {
                 Input::VapourSynth {
@@ -207,7 +208,7 @@ impl Av1anContext {
                 Input::VapourSynth {
                     path, ..
                 } => {
-                    let dec = catch_unwind(AssertUnwindSafe(|| VapoursynthDecoder::from_file(path, variables_map)))
+                    let dec = catch_unwind(AssertUnwindSafe(|| VapoursynthDecoder::from_file(path, variables_map, None)))
                         .map_err(|_| anyhow::anyhow!("cache_vs_input: VapoursynthDecoder::from_file panicked"))??;
                     catch_unwind(AssertUnwindSafe(|| {
                         av_scenechange::Decoder::from_decoder_impl(
@@ -229,10 +230,11 @@ impl Av1anContext {
             Ok::<PathBuf, anyhow::Error>(script_path)
         };
 
-        // Technically we should check if the vapoursynth cache file exists rather than
-        // !self.resume, but the code still works if we are resuming and the
-        // cache file doesn't exist (as it gets generated when vspipe is first
-        // called), so it's not worth adding all the extra complexity.
+        // Technically we should check if the vapoursynth cache file exists
+        // rather than !self.resume, but the code still works if we are
+        // resuming and the cache file doesn't exist (as it gets
+        // generated when vspipe is first called), so it's not worth
+        // adding all the extra complexity.
         if (self.args.input.is_vapoursynth()
             || (self.args.input.is_video()
                 && matches!(
@@ -398,9 +400,9 @@ impl Av1anContext {
                 Ok(())
             });
 
-            // Queue::encoding_loop only sends a message if there was an error (meaning a
-            // chunk crashed) more than MAX_TRIES. So, we have to explicitly
-            // exit the program if that happens.
+            // Queue::encoding_loop only sends a message if there was an error
+            // (meaning a chunk crashed) more than MAX_TRIES. So, we
+            // have to explicitly exit the program if that happens.
             if rx.recv().is_ok() {
                 flowencode_protocol::emit_run_failed(
                     self.args.progress_format,
@@ -414,8 +416,8 @@ impl Av1anContext {
 
             finish_progress_bar();
 
-            // TODO add explicit parameter to concatenation functions to control whether
-            // audio is also muxed in
+            // TODO add explicit parameter to concatenation functions to control
+            // whether audio is also muxed in
             let _audio_output_exists = if let Some(audio_thread) = audio_thread {
                 audio_thread.join().expect("thread should join successfully")?
             } else {
@@ -635,6 +637,7 @@ impl Av1anContext {
                     }
 
                     command
+                        .stdin(Stdio::null())
                         .stdout(Stdio::piped())
                         .stderr(Stdio::piped())
                         .spawn()
@@ -767,8 +770,9 @@ impl Av1anContext {
                         if self.args.verbosity == Verbosity::Verbose && !line.contains('\n') {
                             update_mp_msg(worker_id, line.trim().to_string());
                         }
-                        // This needs to be done before parse_encoded_frames, as it potentially
-                        // mutates the string
+                        // This needs to be done before parse_encoded_frames, as
+                        // it potentially mutates the
+                        // string
                         enc_stderr.push_str(line);
                         enc_stderr.push('\n');
 
@@ -920,8 +924,8 @@ impl Av1anContext {
         Ok(chunks)
     }
 
-    // If we are not resuming, then do scene detection. Otherwise: get scenes from
-    // scenes.json and return that.
+    // If we are not resuming, then do scene detection. Otherwise: get scenes
+    // from scenes.json and return that.
     fn split_routine(&mut self) -> anyhow::Result<&[Scene]> {
         let scene_file = self.args.scenes.as_ref().map_or_else(
             || Cow::Owned(Path::new(&self.args.temp).join("scenes.json")),
@@ -1042,8 +1046,8 @@ impl Av1anContext {
         scene: &Scene,
         frame_rate: f64,
     ) -> anyhow::Result<Chunk> {
-        // the frame end boundary is actually a frame that should be included in the
-        // next chunk
+        // the frame end boundary is actually a frame that should be included in
+        // the next chunk
         let frame_end = scene.end_frame - 1;
 
         fn gen_vspipe_cmd(

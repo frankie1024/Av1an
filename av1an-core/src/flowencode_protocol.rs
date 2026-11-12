@@ -98,6 +98,7 @@ pub fn capabilities() -> Capabilities<'static> {
             "linear",
             "quadratic",
             "natural",
+            "fritschcarlson",
             "pchip",
             "catmull",
             "akima",

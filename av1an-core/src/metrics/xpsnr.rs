@@ -1,4 +1,3 @@
-use core::f64;
 use std::{
     ffi::OsStr,
     path::Path,
@@ -73,6 +72,7 @@ pub fn run_xpsnr(
             source_pipe.args(["-a", &arg]);
         }
         source_pipe.args(args);
+        source_pipe.stdin(Stdio::null());
         source_pipe.stdout(Stdio::piped());
         source_pipe.stderr(Stdio::null());
         source_pipe.spawn()?
@@ -98,11 +98,11 @@ pub fn run_xpsnr(
 
     let distorted = format!(
         "[0:v]scale={}:flags={}:force_original_aspect_ratio=decrease,setsar=1[distorted];",
-        &res, &scaler
+        res, scaler
     );
     let reference = format!(
         "[1:v]{filter}scale={}:flags={}:force_original_aspect_ratio=decrease,setsar=1[ref];",
-        &res, &scaler
+        res, scaler
     );
 
     cmd.arg(format!("{distorted}{reference}{xpsnr}"));
