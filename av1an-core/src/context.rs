@@ -7,7 +7,6 @@ use std::{
     iter,
     path::{Path, PathBuf},
     process::{exit, ChildStderr, Command, Stdio},
-    panic::{catch_unwind, AssertUnwindSafe},
     sync::{
         atomic::{self, AtomicBool, AtomicUsize},
         mpsc,
@@ -208,24 +207,19 @@ impl Av1anContext {
                 Input::VapourSynth {
                     path, ..
                 } => {
-                    let dec = catch_unwind(AssertUnwindSafe(|| VapoursynthDecoder::from_file(path, variables_map, None)))
-                        .map_err(|_| anyhow::anyhow!("cache_vs_input: VapoursynthDecoder::from_file panicked"))??;
-                    catch_unwind(AssertUnwindSafe(|| {
-                        av_scenechange::Decoder::from_decoder_impl(
-                            av_decoders::DecoderImpl::Vapoursynth(dec),
-                        )
-                    }))
-                    .map_err(|_| anyhow::anyhow!("cache_vs_input: Decoder::from_decoder_impl panicked"))??
+                    let dec = VapoursynthDecoder::from_file(path, variables_map, None)?;
+                    av_scenechange::Decoder::from_decoder_impl(
+                        av_decoders::DecoderImpl::Vapoursynth(dec),
+                    )?
                 },
                 video_input => av_scenechange::Decoder::from_script(
                     &video_input.as_script_text()?,
                     variables_map,
                 )?,
             };
-            // Getting the details will evaluate the script and produce the VapourSynth
-            // cache file
-            let _ = catch_unwind(AssertUnwindSafe(|| decoder.get_video_details()))
-                .map_err(|_| anyhow::anyhow!("cache_vs_input: decoder.get_video_details panicked"))?;
+            // Getting the details will evaluate the script and produce the
+            // VapourSynth cache file
+            let _ = decoder.get_video_details();
 
             Ok::<PathBuf, anyhow::Error>(script_path)
         };
