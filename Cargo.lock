@@ -246,7 +246,6 @@ dependencies = [
  "tracing-appender",
  "tracing-subscriber",
  "vergen-git2",
- "winreg",
 ]
 
 [[package]]
@@ -675,7 +674,6 @@ dependencies = [
  "rustc_version",
  "toml",
  "vswhom",
- "winreg",
 ]
 
 [[package]]
@@ -2108,6 +2106,8 @@ checksum = "ba73ea9cf16a25df0c8caa16c51acb937d5712a8429db78a3ee29d5dcacd3a65"
 [[package]]
 name = "vapoursynth"
 version = "0.5.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "413b994d9955202f99298ef502dec6d84f1be7603483d19158a365f9fdb8f128"
 dependencies = [
  "anyhow",
  "thiserror",
@@ -2117,6 +2117,8 @@ dependencies = [
 [[package]]
 name = "vapoursynth-sys"
 version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ef47dc5817613dbe0251eadbe2cea0443edebbb3a551be7b6728314ff44e12e"
 dependencies = [
  "libloading",
 ]
@@ -2418,16 +2420,6 @@ name = "winnow"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "23b97319f7b8343df12cc98938e5c3eb436064524c8d2b4e30a1d3a36eecdf81"
-
-[[package]]
-name = "winreg"
-version = "0.56.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d6f32a0ff4a9f6f01231eb2059cc85479330739333e0e58cadf03b6af2cca10"
-dependencies = [
- "cfg-if",
- "windows-sys",
-]
 
 [[package]]
 name = "writeable"
