@@ -38,3 +38,14 @@ VapourSynth R79 verification uses actual `.vpy` input, scene detection and
 multi-chunk encoding at 8 and 10 bits, followed by decoded-frame counting.
 This is a short-sample compatibility check, not a long-form, HDR/DV or GPU-plugin
 qualification.
+
+## Fork CI and documentation
+
+Both the upstream Linux tests and the Windows compatibility workflow run Clippy
+with warnings treated as errors. Public protocol helpers follow the core crate's
+inline annotations policy.
+
+The documentation workflow always builds and uploads the mdBook site. Deploying
+from a fork is opt-in: first enable GitHub Pages with GitHub Actions as the source,
+then set the repository Actions variable `ENABLE_PAGES` to `true`. The upstream
+repository retains its existing automatic deployment.

@@ -36,9 +36,6 @@ jobs:
         uses: taiki-e/install-action@v2
         with:
           tool: mdbook@${{ env.MDBOOK_VERSION }}
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v5
       - name: Build with mdBook
         run: mdbook build ./site
       - name: Upload artifact
@@ -48,12 +45,16 @@ jobs:
 
   # Deployment job
   deploy:
+    # Forks still build the documentation; publishing requires an enabled Pages site.
+    if: github.repository == 'rust-av/Av1an' || vars.ENABLE_PAGES == 'true'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

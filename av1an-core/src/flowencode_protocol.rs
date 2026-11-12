@@ -81,6 +81,7 @@ struct RunFailed<'a> {
     message:   &'a str,
 }
 
+#[inline]
 pub fn capabilities() -> Capabilities<'static> {
     Capabilities {
         protocol:           FLOWENCODE_PROTOCOL_VERSION,
@@ -160,6 +161,7 @@ fn metric_name(metric: TargetMetric) -> &'static str {
     }
 }
 
+#[inline]
 pub fn emit_run_started(args: &EncodeArgs) {
     emit(args.progress_format, "run_started", RunStarted {
         protocol:        FLOWENCODE_PROTOCOL_VERSION,
@@ -170,6 +172,7 @@ pub fn emit_run_started(args: &EncodeArgs) {
     });
 }
 
+#[inline]
 pub fn emit_input_probed(args: &EncodeArgs, clip_info: &ClipInfo) {
     emit(args.progress_format, "input_probed", InputProbed {
         input_kind:   if args.input.is_vapoursynth() {
@@ -184,12 +187,14 @@ pub fn emit_input_probed(args: &EncodeArgs, clip_info: &ClipInfo) {
     });
 }
 
+#[inline]
 pub fn emit_chunk_plan(progress_format: ProgressFormat, chunk_count: usize) {
     emit(progress_format, "chunk_plan", ChunkPlan {
         chunk_count: chunk_count as u32,
     });
 }
 
+#[inline]
 pub fn emit_chunk_progress(
     progress_format: ProgressFormat,
     completed_chunks: usize,
@@ -203,6 +208,7 @@ pub fn emit_chunk_progress(
     });
 }
 
+#[inline]
 pub fn emit_encoder_log(progress_format: ProgressFormat, chunk: &Chunk, stderr: &str) {
     if stderr.trim().is_empty() {
         return;
@@ -216,12 +222,14 @@ pub fn emit_encoder_log(progress_format: ProgressFormat, chunk: &Chunk, stderr: 
     });
 }
 
+#[inline]
 pub fn emit_run_completed(progress_format: ProgressFormat) {
     emit(progress_format, "run_completed", RunFinished {
         exit_code: 0,
     });
 }
 
+#[inline]
 pub fn emit_run_failed(progress_format: ProgressFormat, exit_code: i32, message: &str) {
     emit(progress_format, "run_failed", RunFailed {
         exit_code,

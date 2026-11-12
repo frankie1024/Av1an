@@ -17,6 +17,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Validate formatting
         run: cargo fmt --all -- --check
+      - name: Validate Clippy
+        run: cargo clippy --locked --profile ci -- -D warnings
       - name: Build Windows backend
         run: cargo build --release --locked
       - name: Test interpolation
